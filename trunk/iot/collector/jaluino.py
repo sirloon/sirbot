@@ -23,7 +23,6 @@ class JaluinoXBee(txXBee):
         ##
         for router in known_routers:
             self.register_router(router)
-        LOG.info("Known XBee routers on init: %s" % self.known_routers)
 
         self.setup()
 
@@ -34,6 +33,7 @@ class JaluinoXBee(txXBee):
         # propagate sending queue to handelrs
         router.coord_queue = self.send_queue
         self.known_routers[router.addr] = router
+        LOG.info("Registering router %s with address %s" % (router,router.addr))
 
     def handle_packet(self, xbee_packet):
         LOG.debug("Xbee packet: %s" % xbee_packet)
@@ -75,7 +75,7 @@ class XBeeRouterHandler(object):
 
 class JaluinoStationMessage(object):
     def __init__(self,flash=None,temp=None,hum=None,light=None,reset=None):
-        self.datadict = {'flash':None, 'temp':None, 'hum':None, 'light':None, 'reset':None}
+        self.datadict = {'flash':None, 'temp':None, 'hum':None, 'light':None, 'reset':None, 'watt':None}
         self.timestamp = None
     def items(self): # act as dict
         return self.datadict.items()
@@ -153,6 +153,7 @@ class JaluinoStation(XBeeRouterHandler):
 
     def do_flash(self,field,timestamp,measure):
         self._current_msg.datadict['flash'] = measure
+        self._current_msg.datadict['watt'] = int(measure) * 60
         # always overwrite timestamp with last (anyway it's the same :))
         self._current_msg.timestamp = timestamp
 

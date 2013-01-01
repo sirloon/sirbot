@@ -1,7 +1,6 @@
 import time as modtime
-import datetime
-import httplib
-import urllib
+import datetime, httplib, urllib
+import simplejson
 
 from base import IOTGateway
 
@@ -9,28 +8,29 @@ import logging
 LOG = logging.getLogger(__name__)
 
 
-class ThingSpeakGateway(IOTGateway):
+class CosmGateway(IOTGateway):
 
-    def __init__(self,msg_class,api_key,field_mapping={},utc_shift=modtime.altzone,*args,**kwargs):
-        super(ThingSpeakGateway,self).__init__(utc_shift,*args,**kwargs)
+    def __init__(self,msg_class,api_key,feed_id,utc_shift=modtime.altzone,*args,**kwargs):
+        super(CosmGateway,self).__init__(utc_shift,*args,**kwargs)
         self.msg_class = msg_class # acception message from class ...
         self.api_key = api_key
-        # ThingSpeak has numeric fields, allow to map data field to custom field name
-        self.fields_mapping = field_mapping
-        self._server = "api.thingspeak.com:80"
-        self._path = "/update"
-        self._method = "POST"
-        self._headers = {"Content-type": "application/x-www-form-urlencoded","Accept": "text/plain"}
+        self.feed_id = int(feed_id)
+        self._server = "api.pachube.com"
+        self._path = "/v2/feeds/%d" % self.feed_id
+        self._method = "PUT"
+        self._headers = {"X-PachubeApiKey": self.api_key}
 
     def prepare(self,data,timestamp):
-        pdata = {}
+        pdata = {
+            "version" : "1.0.0",
+            "datastreams" : []
+            }
         for k,v in data.items():
-            pdata[self.fields_mapping.get(k,k)] = v
+            d = {"at" : timestamp, "id" : k ,"current_value" : v}
+            pdata['datastreams'].append(d)
         # common
-        pdata['key'] = self.api_key
-        pdata['created_at'] = timestamp
         LOG.debug("Mapped data: %s" % pdata)
-        params = urllib.urlencode(pdata)
+        params = simplejson.dumps(pdata)
         LOG.debug("Prepared data: %s" % params)
         return params
 
@@ -47,7 +47,6 @@ class ThingSpeakGateway(IOTGateway):
             content = response.read()
             LOG.info("%s, status:%s, reason:%s, content:%s" % (self.__class__.__name__,response.status, response.reason,response.read()))
             if response.status != 200:
-                raise IOTGatewayException("Failed to send data to ThingSpeak, got status:%s, reason:%s" % (response.status,response.reason))
+                raise IOTGatewayException("Failed to send data to Cosm, got status:%s, reason:%s" % (response.status,response.reason))
         finally:
             conn.close()
-
