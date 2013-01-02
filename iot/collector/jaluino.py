@@ -75,7 +75,7 @@ class XBeeRouterHandler(object):
 
 class JaluinoStationMessage(object):
     def __init__(self,flash=None,temp=None,hum=None,light=None,reset=None):
-        self.datadict = {'flash':None, 'temp':None, 'hum':None, 'light':None, 'reset':None, 'watt':None}
+        self.datadict = {'flash':None, 'temp':None, 'hum':None, 'light':None, 'reset':0, 'watt':None}
         self.timestamp = None
     def items(self): # act as dict
         return self.datadict.items()
@@ -130,6 +130,7 @@ class JaluinoStation(XBeeRouterHandler):
         now = datetime.datetime.now()
         strdt = now.strftime("%y-%m-%d %H:%M:%S")
         LOG.info("Sending datetime %s" % strdt)
+        self._current_msg.datadict['reset'] += 1
         self.coord_queue.put({'addr' : self.addr, 'data' : strdt})
 
     def __call__(self,packet):
