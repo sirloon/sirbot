@@ -3,7 +3,7 @@ import datetime
 import httplib
 import urllib
 
-from base import IOTGateway
+from base import IOTGateway, IOTGatewayException
 
 import logging
 LOG = logging.getLogger(__name__)
