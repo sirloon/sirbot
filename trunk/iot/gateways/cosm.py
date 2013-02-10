@@ -5,7 +5,7 @@ import simplejson
 from base import IOTGateway
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging
 
 
 class CosmGateway(IOTGateway):

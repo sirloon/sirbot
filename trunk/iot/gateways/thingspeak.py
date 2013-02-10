@@ -6,7 +6,7 @@ import urllib
 from base import IOTGateway, IOTGatewayException
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging
 
 
 class ThingSpeakGateway(IOTGateway):
