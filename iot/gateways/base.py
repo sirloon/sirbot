@@ -6,7 +6,7 @@ from twisted.internet import defer, reactor
 from twisted.internet.threads import deferToThread
 
 import logging
-LOG = logging.getLogger(__name__)
+LOG = logging
 
 
 class IOTGateway(object):
